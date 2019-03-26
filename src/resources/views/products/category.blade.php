@@ -20,7 +20,7 @@
 				@endif 
 
 			<label>Title</label>
-			<input type="text" name="title" value="{{ $category->title or old('title') }}">
+			<input type="text" name="title" value="{{ $category->title ?? old('title') }}">
 
 				@if ($errors->first('subtitle'))
 				    <div class="alert alert-error no-hide">
@@ -31,7 +31,7 @@
 				@endif 
 
 			<label>Subtitle</label>
-			<input type="text" name="subtitle" value="{{$category->subtitle or old('subtitle')}}">
+			<input type="text" name="subtitle" value="{{$category->subtitle ?? old('subtitle')}}">
 
 				@if ($errors->first('slug'))
 				    <div class="alert alert-error no-hide">
@@ -42,10 +42,24 @@
 				@endif 		
 
 			<label>Slug</label>
-			<input type="text" name="slug" value="{{$category->slug or old('slug')}}">
+			<input type="text" name="slug" value="{{$category->slug ?? old('slug')}}">
+
+			<label>Parent Category</label>
+			<select name="parent_id">
+				<option value="">None</option>
+				@if ($category->id)
+					@foreach (\SystemInc\LaravelAdmin\ProductCategory::whereNotIn('id', $category->children->pluck('id')->push($category->id))->get() as $category_option)
+						<option value="{{$category_option->id}}" {{$category_option->id==$category->parent_id ? 'selected' : ''}}>{{$category_option->title}}</option>
+					@endforeach
+				@else
+					@foreach (\SystemInc\LaravelAdmin\ProductCategory::all() as $category_option)
+						<option value="{{$category_option->id}}">{{$category_option->title}}</option>
+					@endforeach
+				@endif
+			</select>
 
 			<label>Excerpt</label>
-			<textarea name="excerpt" class="htmlEditorTools" rows="5">{{$category->excerpt or old('excerpt')}}</textarea>
+			<textarea name="excerpt" class="htmlEditorTools" rows="5">{{$category->excerpt ?? old('excerpt')}}</textarea>
 
 				@if ($errors->first('description'))
 				    <div class="alert alert-error no-hide">
@@ -56,12 +70,12 @@
 				@endif 
 
 			<label>Description</label>
-			<textarea name="description" class="htmlEditor" rows="15" data-page-name="category" data-page-id="{{$category->id}}" id="editor-{{ str_replace('.', '', $category->id) }}">{{$category->description or old('description')}}</textarea>
+			<textarea name="description" class="htmlEditor" rows="15" data-page-name="category" data-page-id="{{$category->id}}" id="editor-{{ str_replace('.', '', $category->id) }}">{{$category->description ?? old('description')}}</textarea>
 
 			<label>Thumbnail</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($category->thumb)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $category->thumb}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($category->thumb)}})"></div>
 					<input type="checkbox" name="delete_thumb">Delete this file?
 				@else
 					<div class="fileUpload">
@@ -75,7 +89,7 @@
 				<label>Thumbnail hover</label>
 				<div class="file-input-wrap cf">
 					@if(!empty($category->thumb_hover)) 
-						<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $category->thumb_hover}})"></div>
+						<div class="small-image-preview" style="background-image: url({{ Storage::url($category->thumb_hover)}})"></div>
 						<input type="checkbox" name="delete_thumb_hover">Delete this file?
 					@else
 						<div class="fileUpload">
@@ -89,7 +103,7 @@
 			<label>Image</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($category->image)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $category->image}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($category->image)}})"></div>
 					<input type="checkbox" name="delete_image">Delete this file?
 				@else
 					<div class="fileUpload">
@@ -103,7 +117,7 @@
 				<label>Image hover</label>
 				<div class="file-input-wrap cf">
 					@if(!empty($category->image_hover)) 
-						<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $category->image_hover}})"></div>
+						<div class="small-image-preview" style="background-image: url({{ Storage::url($category->image_hover)}})"></div>
 						<input type="checkbox" name="delete_image_hover">Delete this file?
 					@else
 						<div class="fileUpload">
@@ -118,16 +132,16 @@
 			<br>
 
 			<label>Video</label>
-			<input type="text" name="video" value="{{$category->video or old('video')}}">
+			<input type="text" name="video" value="{{$category->video ?? old('video')}}">
 
 			<label>SEO Title</label>
-			<input type="text" name="seo_title" value="{{$category->seo_title or old('seo_title')}}">
+			<input type="text" name="seo_title" value="{{$category->seo_title ?? old('seo_title')}}">
 
 			<label>SEO Description</label>
-			<input type="text" name="seo_description" value="{{$category->seo_description or old('seo_description')}}">
+			<input type="text" name="seo_description" value="{{$category->seo_description ?? old('seo_description')}}">
 
 			<label>SEO Keywords</label>
-			<input type="text" name="seo_keywords" value="{{$category->seo_keywords or old('seo_keywords')}}">
+			<input type="text" name="seo_keywords" value="{{$category->seo_keywords ?? old('seo_keywords')}}">
 
 			<input type="submit" value="Save" class="save-item">
 

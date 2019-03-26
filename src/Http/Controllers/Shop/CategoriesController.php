@@ -21,7 +21,7 @@ class CategoriesController extends Controller
      */
     public function getIndex()
     {
-        $categories = ProductCategory::orderBy('order_number')->get();
+        $categories = ProductCategory::get();
 
         return view('admin::products.categories', compact('categories'));
     }
@@ -72,8 +72,6 @@ class CategoriesController extends Controller
             return back()->withInput()->withErrors($validation);
         }
 
-        $original_size = is_array($request->original_size) ? $request->original_size : [];
-
         if ($category_id == 'new') {
             $category = new ProductCategory();
         } else {
@@ -82,41 +80,41 @@ class CategoriesController extends Controller
 
         $category->fill($request->all());
 
-        $category->thumb = $request->hasFile('thumb') ? $this->saveImage($request->file('thumb'), 'categories', in_array('thumb', $original_size)) : $category->thumb;
+        $category->thumb = $request->hasFile('thumb') ? $this->saveImageWithRandomName($request->file('thumb'), 'categories') : $category->thumb;
 
         if ($request->input('delete_thumb')) {
-            if (Storage::exists('public/'.$category->thumb)) {
-                Storage::delete('public/'.$category->thumb);
+            if (Storage::exists($category->thumb)) {
+                Storage::delete($category->thumb);
             }
 
             $category->thumb = null;
         }
 
-        $category->image = $request->hasFile('image') ? $this->saveImage($request->file('image'), 'categories', in_array('image', $original_size)) : $category->image;
+        $category->image = $request->hasFile('image') ? $this->saveImageWithRandomName($request->file('image'), 'categories') : $category->image;
 
         if ($request->input('delete_image')) {
-            if (Storage::exists('public/'.$category->image)) {
-                Storage::delete('public/'.$category->image);
+            if (Storage::exists($category->image)) {
+                Storage::delete($category->image);
             }
 
             $category->image = null;
         }
 
-        $category->thumb_hover = $request->hasFile('thumb_hover') ? $this->saveImage($request->file('thumb_hover'), 'categories', in_array('thumb_hover', $original_size)) : $category->thumb_hover;
+        $category->thumb_hover = $request->hasFile('thumb_hover') ? $this->saveImageWithRandomName($request->file('thumb_hover'), 'categories') : $category->thumb_hover;
 
         if ($request->input('delete_thumb_hover')) {
-            if (Storage::exists('public/'.$category->thumb_hover)) {
-                Storage::delete('public/'.$category->thumb_hover);
+            if (Storage::exists($category->thumb_hover)) {
+                Storage::delete($category->thumb_hover);
             }
 
             $category->thumb_hover = null;
         }
 
-        $category->image_hover = $request->hasFile('image_hover') ? $this->saveImage($request->file('image_hover'), 'categories', in_array('image_hover', $original_size)) : $category->image_hover;
+        $category->image_hover = $request->hasFile('image_hover') ? $this->saveImageWithRandomName($request->file('image_hover'), 'categories') : $category->image_hover;
 
         if ($request->input('delete_image_hover')) {
-            if (Storage::exists('public/'.$category->image_hover)) {
-                Storage::delete('public/'.$category->image_hover);
+            if (Storage::exists($category->image_hover)) {
+                Storage::delete($category->image_hover);
             }
 
             $category->image_hover = null;

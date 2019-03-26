@@ -17,7 +17,7 @@ class UpdateCommand extends Command
     public function handle()
     {
         if (empty(config('laravel-admin'))) {
-            $this->error('First instal Laravel Admin with laravel-admin:instal');
+            $this->error('First install Laravel Admin with laravel-admin:install');
 
             return false;
         }
@@ -27,7 +27,7 @@ class UpdateCommand extends Command
         $this->line('Migrating...');
 
         $migrate = Artisan::call('migrate', [
-            '--path'  => 'vendor/systeminc/laravel-admin/src/database/migrations',
+            '--path' => 'vendor/systeminc/laravel-admin/src/database/migrations',
             ]);
 
         $this->line('Migration Done!');

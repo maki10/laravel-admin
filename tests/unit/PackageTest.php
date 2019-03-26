@@ -58,11 +58,6 @@ class PackageTest extends LaravelAdminTestCase
         $this->assertInstanceOf(Gallery::class, SLA::gallery());
     }
 
-    public function testSLAFacadeHaveStoragePath()
-    {
-        $this->assertEquals('http://localhost/storage/test.jpg', SLA::getFile('test.jpg'));
-    }
-
     public function testSLAFacadeHaveLocationsCollection()
     {
         $this->assertInstanceOf(Collection::class, SLA::locations());
@@ -101,7 +96,7 @@ class PackageTest extends LaravelAdminTestCase
     public function testServiceProvider()
     {
         $this->assertTrue($this->app->bound('sla'));
-        $this->assertTrue($this->app->bound('command.laravel-admin.instal'));
+        $this->assertTrue($this->app->bound('command.laravel-admin.install'));
         $this->assertTrue($this->app->bound('command.laravel-admin.update'));
     }
 

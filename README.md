@@ -14,7 +14,7 @@ This is **Laravel Admin**, CRUD (create, read, update and delete) package that c
 
 Once you have your administration panel up, you can easily put all of those elements wherever you want in you application files. For usage documentation see **Usage section** bellow.
 
-Supports Laravel 5.2 -> 5.5
+Supports Laravel 5.2 -> 5.6 and PHP 7+
 
 <img src="/screens/1.png?raw=true" width="250"> . . . <img src="/screens/2.png?raw=true" width="250"> . . . <img src="/screens/3.png?raw=true" width="250"> 
 
@@ -43,12 +43,12 @@ If you want to use this package as a facade, add this line to the `$aliases` arr
 'SLA' => SystemInc\LaravelAdmin\Facades\SLA::class,
 ```
 
-Start package installation by running instal command below:
+Start package installation by running install command below:
 
 ```
-$ php artisan laravel-admin:instal
+$ php artisan laravel-admin:install
 ```
-If you want to instal package again from scratch, just delete the `config/laravel-admin.php` file and drop database, then run install command again.
+If you want to install package again from scratch, just delete the `config/laravel-admin.php` file and drop database, then run install command again.
 
 If our package update throws composer error, try updating dependencies manually with commend below:
 
@@ -58,7 +58,7 @@ $ php artisan laravel-admin:update
 
 Note that this installation uses migrations, so you must run it from machine that has access to your database. 
 
-For instance, if you use Vagrant, you will have to do `vagrant ssh` first, go to your project directory, and run this instal command. The same way you run your standard Laravel's migration command. 
+For instance, if you use Vagrant, you will have to do `vagrant ssh` first, go to your project directory, and run this install command. The same way you run your standard Laravel's migration command. 
 
 
 ## Extends
@@ -68,16 +68,6 @@ For instance, if you use Vagrant, you will have to do `vagrant ssh` first, go to
 - To extend admin router with your own controllers create new file in `/routes/sla-routes.php` and point it to you controller. This will be under choosen `prefix` and secured with Admin's credentials. To keep `view` in same layout visit this [example](https://github.com/systeminc/laravel-admin/wiki/Extended-view) 
 
 
-
-## Image cache 
-
-If you use Laravel Admin v1.4 or greater, please run this command on you project that you working with. This will link `public` directory to `storage/app/public` in order for cache images to work. Be sure to do it from within the environment you use (i.e. homestead ssh)
-
-```
-$ php artisan storage:link
-```
-
-If you already have files in `storage/app` from older version of Laravel Admin, please move it manualy to the `storage/app/public` directory.
 
 ## Database export
 
@@ -91,11 +81,13 @@ $ php artisan laravel-admin:dump-database
 
 Your will be prompted to `Enter password:` for mysql user specified in `.env`. File will be saved in `/database/sla_dumps`.
 
-To restore database on another mashine use:
+To restore database on another machine use:
 
 ```
 $ php artisan laravel-admin:restore-database
 ```
+
+**NOTICE*** Always do migration first and be carefull that new import is compatable with tour migration status. You can check that with Artisan command `php artisan migrate:status` before dumoing the export file, and before importing the same on another machine.
 
 **WARNING** that this will be **DROP** table and restore latest migration in `database/sla_dumps` folder.
 Your will be prompted to proceed twice with droping database. Mysql will ask several times to `Enter password:` for mysql user specified in `.env`. 
@@ -115,9 +107,9 @@ Then if you want to do `php artisan laravel-admin:update`, just type:
 $ sla update
 ```
 
-## Usage
+## Documentation
 
-Visit [wiki](https://github.com/systeminc/laravel-admin/wiki/Blog) 
+Visit [Wiki](https://github.com/systeminc/laravel-admin/wiki/) for detailed usage documentation.
 
 ## Contributing
 
@@ -125,8 +117,7 @@ Contributions to the Laravel Admin library are welcome. Please note the followin
 
 - Follow [PSR-2](http://www.php-fig.org/psr/psr-2/) coding standards.
 - Write tests for new functions and added features
-- use development branch
-- use `gulp --production` for assets
+- use [Laravel Mix](https://laravel.com/docs/master/mix) for assets
 
 
 composer install

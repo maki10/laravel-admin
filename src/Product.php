@@ -4,6 +4,7 @@ namespace SystemInc\LaravelAdmin;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use SystemInc\LaravelAdmin\Scopes\OrderScope;
 
 class Product extends Model
 {
@@ -44,6 +45,18 @@ class Product extends Model
         'weight',
     ];
 
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new OrderScope());
+    }
+
     public function category()
     {
         return $this->belongsTo('SystemInc\LaravelAdmin\ProductCategory', 'product_category_id');
@@ -72,5 +85,10 @@ class Product extends Model
     public function getVariationsByGroup($group)
     {
         return $this->hasMany('SystemInc\LaravelAdmin\ProductVariation')->whereGroup($group)->get();
+    }
+
+    public function scopeVisible($query)
+    {
+        return $query->whereVisible(1);
     }
 }

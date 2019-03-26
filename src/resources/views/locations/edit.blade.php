@@ -27,7 +27,7 @@
 			@endif 
 
 			<label>Title</label>
-			<input type="text" name="title" placeholder="Location title" value="{{ $location->title or old('title') }}">
+			<input type="text" name="title" placeholder="Location title" value="{{ $location->title ?? old('title') }}">
 
 			@if ($errors->first('url'))
 			    <div class="alert alert-error no-hide">
@@ -38,7 +38,7 @@
 			@endif 
 
 			<label>Url</label>
-			<input type="text" name="url" placeholder="Url" value="{{ $location->url or old('url') }}">
+			<input type="text" name="url" placeholder="Url" value="{{ $location->url ?? old('url') }}">
 
 			@if ($errors->first('key'))
 			    <div class="alert alert-error no-hide">
@@ -49,10 +49,10 @@
 			@endif 
 
 			<label>Key</label>
-			<input type="text" name="key" placeholder="Location key" value="{{ $location->key or old('key') }}">
+			<input type="text" name="key" placeholder="Location key" value="{{ $location->key ?? old('key') }}">
 
 			<label for="description">Description:</label>
-			<textarea name="description" class="htmlEditor" rows="15" data-page-name="description" data-page-id="new" id="editor-1">{{ $location->description or old('description') }}</textarea>
+			<textarea name="description" class="htmlEditor" rows="15" data-page-name="description" data-page-id="new" id="editor-1">{{ $location->description ?? old('description') }}</textarea>
 			
 			<div class="input-wrap">
 				<label>Adress:</label>
@@ -75,7 +75,7 @@
 			<label>Image</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($location->image)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $location->image}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($location->image)}})"></div>
 					<input type="checkbox" name="delete_image" value="Delete this file">Delete this file?
 				@else
 					<div class="fileUpload">
@@ -88,7 +88,7 @@
 			<label>Thumb Image</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($location->thumb_image)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $location->thumb_image}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($location->thumb_image)}})"></div>
 					<input type="checkbox" name="delete_thumb_image" value="Delete this file">Delete this file?
 				@else
 					<div class="fileUpload">
@@ -101,7 +101,7 @@
 			<label>Marker Image</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($location->marker_image)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $location->marker_image}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($location->marker_image)}})"></div>
 					<input type="checkbox" name="delete_marker_image" value="Delete this file">Delete this file?
 				@else
 					<div class="fileUpload">

@@ -22,6 +22,15 @@ class AdminServiceProvider extends ServiceProvider
         $auth_config = array_merge_recursive($this->app['config']['auth'], include __DIR__.'/config/auth.php');
         $this->app['config']->set('auth', $auth_config);
 
+        // Merge filesystems configurations
+        $filesystems_config = array_merge_recursive($this->app['config']['filesystems'], include __DIR__.'/config/filesystems.php');
+        $this->app['config']->set('filesystems', $filesystems_config);
+
+        // Set default config to uploads
+        if (config('filesystems.default') === 'local') {
+            config(['filesystems.default' => 'uploads']);
+        }
+
         $this->loadViewsFrom(__DIR__.'/resources/views/', 'admin');
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
@@ -36,9 +45,9 @@ class AdminServiceProvider extends ServiceProvider
         $this->app->singleton('sla', 'SystemInc\LaravelAdmin\SLA');
 
         $this->app->singleton(
-            'command.laravel-admin.instal',
+            'command.laravel-admin.install',
             function () {
-                return new Console\InstalCommand();
+                return new Console\InstallCommand();
             }
         );
 
@@ -63,7 +72,7 @@ class AdminServiceProvider extends ServiceProvider
             }
         );
 
-        $this->commands(['command.laravel-admin.instal']);
+        $this->commands(['command.laravel-admin.install']);
         $this->commands(['command.laravel-admin.update']);
         $this->commands(['command.laravel-admin.dump']);
         $this->commands(['command.laravel-admin.restore']);

@@ -23,7 +23,7 @@ class RestoreCommand extends Command
     public function handle()
     {
         if (empty(config('laravel-admin'))) {
-            $this->error('First instal Laravel Admin with laravel-admin:instal');
+            $this->error('First install Laravel Admin with laravel-admin:install');
 
             return false;
         }
@@ -37,18 +37,18 @@ class RestoreCommand extends Command
         });
 
         if (count($migrations) == 0) {
-            $this->error('No migrations in: '.$path);
+            $this->error('No database dumps in: '.$path);
 
             $this->consoleLastLine();
         } else {
             $latest_migration = end($migrations);
 
-            $this->info('Latest migration is: '.$latest_migration->getFilename());
+            $this->info('Latest database dump is: '.$latest_migration->getFilename());
 
             $proceed = $this->ask('Database will be droped! Do you want to proceed?', 'No');
             $this->isInArray($proceed);
 
-            $drop = $this->ask('Drop database and restore latest migration?', 'No');
+            $drop = $this->ask('Drop database and restore latest database dump?', 'No');
             $this->isInArray($drop);
 
             $this->info('You will be prompted for MySQL database password for three actions.');

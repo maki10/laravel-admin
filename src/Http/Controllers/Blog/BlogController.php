@@ -3,6 +3,7 @@
 namespace SystemInc\LaravelAdmin\Http\Controllers\Blog;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Storage;
 use SystemInc\LaravelAdmin\BlogCategory;
@@ -17,7 +18,7 @@ class BlogController extends Controller
     public function __construct()
     {
         if (config('laravel-admin.modules.blog') == false) {
-            return redirect(config('laravel-admin.route_prefix'))->with('error', 'This modules is disabled in config/laravel-admin.php')->send();
+            return redirect(config('laravel-admin.route_prefix'))->with('error', 'Blog module is disabled in config/laravel-admin.php')->send();
         }
     }
 
@@ -72,12 +73,16 @@ class BlogController extends Controller
     public function postSave(Request $request, $post_id)
     {
         $post = BlogPost::find($post_id);
-        $post->update($request->all());
+        $data = $request->all();
 
-        $original_size = is_array($request->original_size) ? $request->original_size : [];
+        if ($request->published_at) {
+            $data['published_at'] = Carbon::createFromFormat('m/d/Y H:i', $request->published_at)->toDateTimeString();
+        }
+
+        $post->update($data);
 
         if ($request->hasFile('thumb')) {
-            $post->thumb = $this->saveImage($request->file('thumb'), 'blog', in_array('thumb', $original_size));
+            $post->thumb = $this->saveImageWithRandomName($request->file('thumb'), 'blog');
         }
 
         if ($request->input('delete_thumb')) {
@@ -86,6 +91,18 @@ class BlogController extends Controller
             }
 
             $post->thumb = null;
+        }
+
+        if ($request->hasFile('cover')) {
+            $post->cover = $this->saveImageWithRandomName($request->file('cover'), 'blog');
+        }
+
+        if ($request->input('delete_cover')) {
+            if (Storage::exists($post->cover)) {
+                Storage::delete($post->cover);
+            }
+
+            $post->cover = null;
         }
 
         $post->slug = str_slug($request->slug);

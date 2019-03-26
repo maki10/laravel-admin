@@ -22,7 +22,7 @@ class AdminController extends Controller
      */
     public function getIndex()
     {
-        return view('admin::index');
+        return redirect(config('laravel-admin.route_prefix').'/'.config('laravel-admin.dashboard_module'));
     }
 
     /**
@@ -80,10 +80,10 @@ class AdminController extends Controller
 
         $directory = 'images/tiny/'.$page_name.'/'.$page_id;
 
-        if (!Storage::exists('public/'.$directory)) {
-            Storage::createDir('public/'.$directory);
+        if (!Storage::exists($directory)) {
+            Storage::makeDirectory($directory);
         }
-        $images = Storage::files('public/'.$directory);
+        $images = Storage::files($directory);
 
         return view('admin::tiny-images', compact('page_id', 'page_name', 'editor_id', 'images', 'directory'));
     }
@@ -103,11 +103,11 @@ class AdminController extends Controller
 
         foreach ($request->file('files') as $file) {
             if ($file->isValid() && in_array($file->getClientOriginalExtension(), $allowed) && strpos($directory, 'images/tiny') !== false) {
-                $original = $this->cleanSpecialChars($file->getClientOriginalName());
+                $original = $this->sanitizeFilename($file->getClientOriginalName());
 
                 $original_image = Image::make($file)->interlace()->encode();
 
-                Storage::put('public/'.$directory.'/'.$original, $original_image);
+                Storage::put($directory.'/'.$original, $original_image);
             }
         }
 

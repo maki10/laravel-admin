@@ -27,7 +27,7 @@
 
 				$(this).fadeOut('fast').fadeIn('fast');
 
-				window.parent.tinyMCE.get("{{$editor_id}}").execCommand('mceInsertContent',false,'<img style="position: relative; float: left;" src="'+$(this).attr("src")+'">');
+				window.parent.tinyMCE.get("{{$editor_id}}").execCommand('mceInsertContent',false,'<img src="'+$(this).attr("src")+'">');
 			});
 		
 			$(".delete-image").click(function(e) {
@@ -131,7 +131,7 @@
 					@foreach ($images as $image) 
 						<div class="thumb">
 							<div class="delete-image" data-path='{{$image}}'>x</div>
-							<img src="{{ asset('storage') .'/'. trim($image, 'public')}}">
+							<img src="{{ Storage::url($image)}}">
 						</div>						
 					@endforeach
 

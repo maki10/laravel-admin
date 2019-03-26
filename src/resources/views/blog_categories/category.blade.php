@@ -23,7 +23,7 @@
 				@endif 
 
 			<label>Title</label>
-			<input type="text" name="title" value="{{ $category->title or old('title') }}">
+			<input type="text" name="title" value="{{ $category->title ?? old('title') }}">
 
 				@if ($errors->first('subtitle'))
 				    <div class="alert alert-error no-hide">
@@ -34,7 +34,7 @@
 				@endif 
 
 			<label>Subtitle</label>
-			<input type="text" name="subtitle" value="{{$category->subtitle or old('subtitle')}}">
+			<input type="text" name="subtitle" value="{{$category->subtitle ?? old('subtitle')}}">
 
 				@if ($errors->first('slug'))
 				    <div class="alert alert-error no-hide">
@@ -45,10 +45,10 @@
 				@endif 		
 
 			<label>Slug</label>
-			<input type="text" name="slug" value="{{$category->slug or old('slug')}}">
+			<input type="text" name="slug" value="{{$category->slug ?? old('slug')}}">
 
 			<label>Excerpt</label>
-			<textarea name="excerpt" class="htmlEditorTools" rows="5">{{$category->excerpt or old('excerpt')}}</textarea>
+			<textarea name="excerpt" class="htmlEditorTools" rows="5">{{$category->excerpt ?? old('excerpt')}}</textarea>
 
 				@if ($errors->first('description'))
 				    <div class="alert alert-error no-hide">
@@ -59,12 +59,12 @@
 				@endif 
 
 			<label>Description</label>
-			<textarea name="description" class="htmlEditor" rows="15" data-page-name="category" data-page-id="{{$category->id}}" id="editor-{{ str_replace('.', '', $category->id) }}">{{$category->description or old('description')}}</textarea>
+			<textarea name="description" class="htmlEditor" rows="15" data-page-name="category" data-page-id="{{$category->id}}" id="editor-{{ str_replace('.', '', $category->id) }}">{{$category->description ?? old('description')}}</textarea>
 
 			<label>Thumbnail</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($category->thumb)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $category->thumb}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($category->thumb)}})"></div>
 					<input type="checkbox" name="delete_thumb">Delete this file?
 				@else
 					<div class="fileUpload">
@@ -91,13 +91,13 @@
 			<br>
 
 			<label>SEO Title</label>
-			<input type="text" name="seo_title" value="{{$category->seo_title or old('seo_title')}}">
+			<input type="text" name="seo_title" value="{{$category->seo_title ?? old('seo_title')}}">
 
 			<label>SEO Description</label>
-			<input type="text" name="seo_description" value="{{$category->seo_description or old('seo_description')}}">
+			<input type="text" name="seo_description" value="{{$category->seo_description ?? old('seo_description')}}">
 
 			<label>SEO Keywords</label>
-			<input type="text" name="seo_keywords" value="{{$category->seo_keywords or old('seo_keywords')}}">
+			<input type="text" name="seo_keywords" value="{{$category->seo_keywords ?? old('seo_keywords')}}">
 
 			<input type="submit" value="Save" class="save-item">
 

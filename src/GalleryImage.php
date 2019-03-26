@@ -4,17 +4,27 @@ namespace SystemInc\LaravelAdmin;
 
 use Illuminate\Database\Eloquent\Model;
 use SystemInc\LaravelAdmin\Facades\SLA as LaravelAdminFacade;
+use SystemInc\LaravelAdmin\Scopes\OrderScope;
 
 class GalleryImage extends Model
 {
     protected $fillable = [
         'gallery_id',
         'source',
-        'path_source',
-        'thumb_source',
-        'mobile_source',
         'order_number',
     ];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new OrderScope());
+    }
 
     public function getUrlAttribute()
     {
@@ -23,7 +33,12 @@ class GalleryImage extends Model
 
     public function getAllElements()
     {
-        return $this->hasMany(GalleryElement::class, 'image_id')->orderBy('order_number');
+        return $this->hasMany(GalleryElement::class, 'image_id');
+    }
+
+    public function elements()
+    {
+        return $this->getAllElements();
     }
 
     public function gallery()

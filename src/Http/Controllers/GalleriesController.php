@@ -21,7 +21,7 @@ class GalleriesController extends Controller
     public function __construct()
     {
         if (config('laravel-admin.modules.galleries') == false) {
-            return redirect(config('laravel-admin.route_prefix'))->with('error', 'This modules is disabled in config/laravel-admin.php')->send();
+            return redirect(config('laravel-admin.route_prefix'))->with('error', 'Gallery module is disabled in config/laravel-admin.php')->send();
         }
     }
 
@@ -63,7 +63,7 @@ class GalleriesController extends Controller
                 return back()->with(['error' => 'Similar gallery exists, so we can create key('.$key.'), try deferent title']);
             }
 
-            $gallery = Gallery::create([
+            Gallery::create([
                 'title' => $request->title,
                 'key'   => $key,
             ]);
@@ -129,7 +129,7 @@ class GalleriesController extends Controller
         }
 
         foreach ($gallery->images as $image) {
-            Storage::delete('public/'.$image->source, 'public/'.$image->thumb_source, 'public/'.$image->mobile_source);
+            Storage::delete($image->source);
 
             $image->delete();
         }
@@ -191,7 +191,7 @@ class GalleriesController extends Controller
         $element->create([
             'key'                  => $this->sanitizeElements($request->title),
             'title'                => $request->title,
-            'content'              => $request->page_element_type_id == 3 ? $this->handleFileElement($request->file('content')) : $request->content,
+            'content'              => $request->page_element_type_id == 3 ? $this->handleFileElement($request->file('content')) : $request->input('content'),
             'image_id'             => $image_id,
             'page_element_type_id' => $request->page_element_type_id,
         ]);
@@ -210,7 +210,7 @@ class GalleriesController extends Controller
     {
         $element = GalleryElement::find($element_id);
 
-        $mime = empty($element->content) || $element->page_element_type_id != 3 ? null : Storage::mimeType('public/'.$element->content);
+        $mime = empty($element->content) || $element->page_element_type_id != 3 ? null : Storage::mimeType($element->content);
 
         return view('admin::galleries.elements.edit-element', compact('element', 'mime'));
     }
@@ -238,7 +238,7 @@ class GalleriesController extends Controller
         $element->update([
             'key'     => $this->sanitizeElements($request->key),
             'title'   => $request->title,
-            'content' => $request->hasFile('content') ? $this->handleFileElement($request->file('content')) : $request->content,
+            'content' => $request->hasFile('content') ? $this->handleFileElement($request->file('content')) : $request->input('content'),
         ]);
 
         return redirect($request->segment(1).'/galleries/image/'.$image->gallery_id.'/'.$image->id)->with('success', 'Element updated');
@@ -258,7 +258,7 @@ class GalleriesController extends Controller
         $image = GalleryImage::find($element->image_id);
 
         if ($element->page_element_type_id == 3 && !empty($element->content)) {
-            Storage::delete('public/'.$element->content);
+            Storage::delete($element->content);
         }
 
         $page_id = $element->page_id;
@@ -278,7 +278,7 @@ class GalleriesController extends Controller
     {
         $element = GalleryElement::find($element_id);
 
-        Storage::delete('public/'.$element->content);
+        Storage::delete($element->content);
 
         $element->content = null;
         $element->save();
@@ -289,34 +289,21 @@ class GalleriesController extends Controller
     /**
      * Store a created images in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param array $images
+     * @param $gallery_id
+     * @param bool $image_id
      *
-     * @return \Illuminate\Http\Response
+     * @return bool
      */
     private function uploadImages($images, $gallery_id, $image_id = false)
     {
         if (is_array($images)) {
             foreach (array_filter($images) as $image) {
-                if ($image->isValid()) {
-                    $image_name = str_random(5);
-
-                    $original = '/'.$gallery_id.'-'.$image_name.'.'.$image->getClientOriginalExtension();
-                    $thumb = '/thumb/'.$gallery_id.'-'.$image_name.'.'.$image->getClientOriginalExtension();
-                    $mobile = '/mobile/'.$gallery_id.'-'.$image_name.'.'.$image->getClientOriginalExtension();
-
-                    $original_path = storage_path('public/images/galleries'.$original);
-
-                    $original_image = $this->resizeImage(1920, 1080, 'images/galleries/', 'images/galleries'.$original, $image);
-                    $thumb_image = $this->resizeImage(375, 200, 'images/galleries/thumb/', 'images/galleries'.$thumb, $image);
-                    $mobile_image = $this->resizeImage(1024, 768, 'images/galleries/mobile/', 'images/galleries'.$mobile, $image);
-                }
+                $storage_key = $this->saveImageWithRandomName($image, 'galleries/'.$gallery_id);
 
                 $data = [
-                    'gallery_id'        => $gallery_id,
-                    'source'            => $original_image,
-                    'path_source'       => $original_path,
-                    'thumb_source'      => $thumb_image,
-                    'mobile_source'     => $mobile_image,
+                    'gallery_id'    => $gallery_id,
+                    'source'        => $storage_key,
                 ];
 
                 if ($image_id) {
@@ -327,6 +314,8 @@ class GalleriesController extends Controller
             }
 
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -335,15 +324,10 @@ class GalleriesController extends Controller
      */
     private function handleFileElement($file)
     {
-        $imagesExtension = ['jpg', 'jpeg', 'gif', 'png'];
-
         if ($file && $file->isValid()) {
-            if (in_array($file->getClientOriginalExtension(), $imagesExtension)) {
-                return $this->resizeImage(1920, 1080, 'images/galleryelements', 'images/galleryelements/'.$this->cleanSpecialChars($file->getClientOriginalName()), $file);
-            }
-            $dirname = 'elements/'.$this->cleanSpecialChars($file->getClientOriginalName());
+            $dirname = 'elements/'.$this->sanitizeFilename($file->getClientOriginalName());
 
-            Storage::put('public/'.$dirname, file_get_contents($file));
+            Storage::put($dirname, file_get_contents($file));
 
             return $dirname;
         }

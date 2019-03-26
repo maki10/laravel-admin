@@ -26,7 +26,7 @@ class ProductsController extends Controller
      */
     public function getIndex()
     {
-        $products = Product::orderBy('order_number')->get();
+        $products = Product::get();
 
         return view('admin::products.products', compact('products'));
     }
@@ -78,64 +78,66 @@ class ProductsController extends Controller
             return back()->withInput()->withErrors($validation);
         }
 
-        $original_size = is_array($request->original_size) ? $request->original_size : [];
-
         $product = Product::find($product_id);
 
         $product->update($request->all());
 
         if ($request->hasFile('pdf')) {
-            $product->pdf = $this->uploadPdf($request->file('pdf'), 'products');
+            $product->pdf = $this->savePdf($request->file('pdf'), 'products');
         }
 
         if ($request->hasFile('thumb')) {
-            $product->thumb = $this->saveImage($request->file('thumb'), 'products', in_array('thumb', $original_size));
+            $product->thumb = $this->saveImageWithRandomName($request->file('thumb'), 'products');
         }
         if ($request->hasFile('image')) {
-            $product->image = $this->saveImage($request->file('image'), 'products', in_array('image', $original_size));
+            $product->image = $this->saveImageWithRandomName($request->file('image'), 'products');
         }
 
         if (!empty($request->delete_thumb)) {
-            if (Storage::exists('public/'.$product->thumb)) {
-                Storage::delete('public/'.$product->thumb);
+            if (Storage::exists($product->thumb)) {
+                Storage::delete($product->thumb);
             }
 
             $product->thumb = null;
         }
 
         if (!empty($request->delete_image)) {
-            if (Storage::exists('public/'.$product->image)) {
-                Storage::delete('public/'.$product->image);
+            if (Storage::exists($product->image)) {
+                Storage::delete($product->image);
             }
 
             $product->image = null;
         }
 
         if ($request->hasFile('thumb_hover')) {
-            $product->thumb_hover = $this->saveImage($request->file('thumb_hover'), 'products', in_array('thumb_hover', $original_size));
+            $product->thumb_hover = $this->saveImageWithRandomName($request->file('thumb_hover'), 'products');
         }
         if ($request->hasFile('image_hover')) {
-            $product->image_hover = $this->saveImage($request->file('image_hover'), 'products', in_array('image_hover', $original_size));
+            $product->image_hover = $this->saveImageWithRandomName($request->file('image_hover'), 'products');
         }
 
         if (!empty($request->delete_thumb_hover)) {
-            if (Storage::exists('public/'.$product->thumb_hover)) {
-                Storage::delete('public/'.$product->thumb_hover);
+            if (Storage::exists($product->thumb_hover)) {
+                Storage::delete($product->thumb_hover);
             }
 
             $product->thumb_hover = null;
         }
 
         if (!empty($request->delete_image_hover)) {
-            if (Storage::exists('public/'.$product->image_hover)) {
-                Storage::delete('public/'.$product->image_hover);
+            if (Storage::exists($product->image_hover)) {
+                Storage::delete($product->image_hover);
             }
 
             $product->image_hover = null;
         }
 
         if (!empty($request->delete_pdf)) {
-            $product->pdf = $this->removePdf($product->pdf);
+            if (Storage::exists($product->pdf)) {
+                Storage::delete($product->pdf);
+            }
+
+            $product->pdf = null;
         }
 
         $product->slug = str_slug($request->slug);
@@ -158,20 +160,18 @@ class ProductsController extends Controller
         $gallery = Gallery::whereTitle($product->gallery->title)->first();
 
         foreach ($gallery->images as $image) {
-            Storage::delete(
-                Storage::exists('public/'.$image->source) ? 'public/'.$image->source : '',
-                Storage::exists('public/'.$image->thumb_source) ? 'public/'.$image->thumb_source : '',
-                Storage::exists('public/'.$image->mobile_source) ? 'public/'.$image->mobile_source : ''
-            );
+            if (Storage::exists($image->source)) {
+                Storage::delete($image->source);
+            }
 
             $image->delete();
         }
-        Storage::exists('public/'.$product->pdf) ? 'public/'.$product->pdf : '';
+        Storage::exists($product->pdf) ? $product->pdf : '';
 
-        Storage::exists('public/'.$product->image) ? 'public/'.$product->image : '';
-        Storage::exists('public/'.$product->image_hover) ? 'public/'.$product->image_hover : '';
-        Storage::exists('public/'.$product->thumb) ? 'public/'.$product->thumb : '';
-        Storage::exists('public/'.$product->thumb_hover) ? 'public/'.$product->thumb_hover : '';
+        Storage::exists($product->image) ? $product->image : '';
+        Storage::exists($product->image_hover) ? $product->image_hover : '';
+        Storage::exists($product->thumb) ? $product->thumb : '';
+        Storage::exists($product->thumb_hover) ? $product->thumb_hover : '';
 
         $gallery->delete();
         $product->delete();
@@ -225,6 +225,7 @@ class ProductsController extends Controller
         $product = new Product();
         $product->title = 'New product';
         $product->slug = 'new-product-'.time();
+        $product->visible = 0;
         $product->save();
 
         return $product;
@@ -265,10 +266,8 @@ class ProductsController extends Controller
 
         $variation->fill($request->all());
 
-        $original_size = is_array($request->original_size) ? $request->original_size : [];
-
         if ($request->hasFile('image')) {
-            $variation->image = $this->saveImage($request->file('image'), 'products', in_array('image', $original_size));
+            $variation->image = $this->saveImageWithRandomName($request->file('image'), 'products');
         }
 
         $variation->price = !empty($request->price) ? $request->price : 0;
@@ -297,15 +296,13 @@ class ProductsController extends Controller
         $variation = ProductVariation::find($variation_id);
         $variation->update($request->all());
 
-        $original_size = is_array($request->original_size) ? $request->original_size : [];
-
         if ($request->hasFile('image')) {
-            $variation->image = $this->saveImage($request->file('image'), 'products', in_array('image', $original_size));
+            $variation->image = $this->saveImageWithRandomName($request->file('image'), 'products');
         }
 
         if (!empty($request->delete_image)) {
-            if (Storage::exists('public/'.$variation->image)) {
-                Storage::delete('public/'.$variation->image);
+            if (Storage::exists($variation->image)) {
+                Storage::delete($variation->image);
             }
 
             $variation->image = null;
@@ -321,8 +318,8 @@ class ProductsController extends Controller
         $variation = ProductVariation::find($variation_id);
 
         if (!empty($variation->image)) {
-            if (Storage::exists('public/'.$variation->image)) {
-                Storage::delete('public/'.$variation->image);
+            if (Storage::exists($variation->image)) {
+                Storage::delete($variation->image);
             }
         }
 

@@ -45,6 +45,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Dashboard default module
+    |--------------------------------------------------------------------------
+    |
+    | Set default module for Admin dashboard
+    |
+    */
+
+    'dashboard_module' => 'pages',
+
+    /*
+    |--------------------------------------------------------------------------
     | Invoice
     |--------------------------------------------------------------------------
     |
@@ -53,23 +64,21 @@ return [
     */
 
     'invoice' => [
-        'location'       => '',
-        'address'        => '',
-        'skype'          => '',
-        'website'        => '',
-        'email'          => '',
-        'company_prefix' => '',
-        'company_name'   => '',
-        'company_number' => '',
-        'tax_id'         => '',
-        'vat'            => '',
-        'disclaimer'     => '',
-        'beneficiary'    => '',
-        'IBAN'           => '',
-        'swift'          => '',
-        'bank'           => '',
-        'account_no'     => '',
-        'small_note'     => '',
-        'signee'         => '',
+        'address'         => '',
+        'phone'           => '',
+        'website'         => '',
+        'email'           => '',
+        'company_name'    => '',
+        'company_number'  => '',
+        'tax_id'          => '',
+        'vat'             => '',
+        'beneficiary'     => '',
+        'IBAN'            => '',
+        'swift'           => '',
+        'bank'            => '',
+        'account_no'      => '',
+        'proforma_notice' => '',
+        'notice'          => '',
+        'signee'          => '',
     ],
 ];

@@ -2,9 +2,6 @@
 
 namespace SystemInc\LaravelAdmin;
 
-use Illuminate\Http\Request;
-use Mail;
-
 class Subscribe
 {
     /**
@@ -14,19 +11,9 @@ class Subscribe
      *
      * @return bool
      */
-    public function subscribe(Request $request)
+    public function subscribe($data)
     {
-        $subscriber = Lead::create(['data' => json_encode($request->all())]);
-
-        $setting = LeadSetting::first();
-
-        if (!empty($request->email) && !empty($request->full_name)) {
-            Mail::send('admin::mail.welcome', ['setting' => $setting], function ($m) use ($subscriber, $setting, $request) {
-                $m->from('noreply@'.$setting->mailer_name, $setting->mailer_name);
-
-                $m->to($request->email, $request->full_name)->subject($setting->thank_you_subject);
-            });
-        }
+        $subscriber = Lead::create(['data' => json_encode(array_except($data, ['_token', 'submit']))]);
 
         return true;
     }

@@ -32,7 +32,7 @@
 
 		
 			<label>Title</label>
-			<input type="text" name="title" placeholder="Page title" value="{{ $element->title or old('title') }}">
+			<input type="text" name="title" placeholder="Element title" value="{{ $element->title ?? old('title') }}">
 
 			@if ($errors->first('content'))
 			    <div class="alert alert-error no-hide">
@@ -45,26 +45,33 @@
 			@if ($element->page_element_type_id == 1 || old('page_element_type_id') == 1)
 
 				<label>Content</label>
-				<textarea name="content" rows="5" placeholder="Content">{{ $element->content or old('content') }}</textarea>
+				<textarea name="content" rows="5" placeholder="Content">{{ $element->content ?? old('content') }}</textarea>
 				
 			@elseif ($element->page_element_type_id == 2 || old('page_element_type_id') == 2)
 
 				<label>Content</label>
-				<textarea name="content" class="htmlEditor" data-page-name="page_element" data-page-id="{{ $element->id }}" id="editor-{{ $element->id }}"  rows="5" placeholder="Content">{{ $element->content or old('content') }}</textarea>
+				<textarea name="content" class="htmlEditor" data-page-name="page_element" data-page-id="{{ $element->id }}" id="editor-{{ $element->id }}"  rows="5" placeholder="Content">{{ $element->content ?? old('content') }}</textarea>
 
 			@elseif ($element->page_element_type_id == 3 || old('page_element_type_id') == 3)
 
-				@if (strstr($mime, 'image') != false)
+				@if (strstr($mime, 'image') !== false)
 					<div class="cf" style="position: relative">
-						<img src="{{ asset('storage').'/'.$element->content }}" alt="" style="max-width: 200px; width: 100%; background-color: #ddd;" class="left">
+						<img src="{{ Storage::url($element->content) }}" alt="" style="max-width: 200px; width: 100%; background-color: #ddd;" class="left">
 						<div class="cf">
 							<input type="hidden" name="content" value="{{ $element->content }}">
 							<a href="pages/delete-element-file/{{ $element->id }}" class="button remove-item file image left">Delete file</a>
 						</div>
 					</div>
-				@elseif ($mime != null)
+				@elseif ($mime === null)
 					<div class="cf" style="position: relative">
-						<a href="{{ asset('storage').'/'.$element->content }}" download class="button item left">{{ $element->title }}</a>
+						<div class="cf">
+							<input type="hidden" name="content" value="{{ $element->content }}">
+							<a href="pages/delete-element-file/{{ $element->id }}" class="button remove-item file left">Delete file</a>
+						</div>
+					</div>
+				@else
+					<div class="cf" style="position: relative">
+						<a href="{{ Storage::url($element->content) }}" download class="button item left">{{ $element->title }}</a>
 						<div class="cf">
 							<input type="hidden" name="content" value="{{ $element->content }}">
 							<a href="pages/delete-element-file/{{ $element->id }}" class="button remove-item file left">Delete file</a>

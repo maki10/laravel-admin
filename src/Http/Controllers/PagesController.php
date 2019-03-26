@@ -20,7 +20,7 @@ class PagesController extends Controller
     public function __construct()
     {
         if (config('laravel-admin.modules.pages') == false) {
-            return redirect(config('laravel-admin.route_prefix'))->with('error', 'This modules is disabled in config/laravel-admin.php')->send();
+            return redirect(config('laravel-admin.route_prefix'))->with('error', 'Pages module is disabled in config/laravel-admin.php')->send();
         }
     }
 
@@ -218,7 +218,7 @@ class PagesController extends Controller
         $keys = explode('.', $element->key);
         $key = $keys[1];
 
-        $mime = empty($element->content) || $element->page_element_type_id != 3 ? null : Storage::mimeType('public/'.$element->content);
+        $mime = Storage::exists($element->content) ? Storage::mimeType($element->content) : null;
 
         return view('admin::pages.edit-element', compact('element', 'mime', 'key'));
     }
@@ -234,7 +234,7 @@ class PagesController extends Controller
     {
         $element = PageElement::find($element_id);
 
-        Storage::delete('public/'.$element->content);
+        Storage::delete($element->content);
 
         $element->content = null;
         $element->save();
@@ -283,7 +283,7 @@ class PagesController extends Controller
         $element = PageElement::find($element_id);
 
         if ($element->page_element_type_id == 3 && !empty($element->content)) {
-            Storage::delete('public/'.$element->content);
+            Storage::delete($element->content);
         }
 
         $page_id = $element->page_id;
@@ -315,15 +315,10 @@ class PagesController extends Controller
      */
     private function handleFileElement($file, $elements_prefix)
     {
-        $imagesExtension = ['jpg', 'jpeg', 'gif', 'png'];
-
         if ($file && $file->isValid()) {
-            if (in_array($file->getClientOriginalExtension(), $imagesExtension)) {
-                return $this->resizeImage(1920, 1080, 'images/galleryelements', 'images/galleryelements/'.$this->cleanSpecialChars($file->getClientOriginalName()), $file);
-            }
-            $dirname = 'pages/'.$elements_prefix.'/'.$this->cleanSpecialChars($file->getClientOriginalName());
+            $dirname = 'pages/'.$elements_prefix.'/'.$this->sanitizeFilename($file->getClientOriginalName());
 
-            Storage::put('public/'.$dirname, file_get_contents($file));
+            Storage::put($dirname, file_get_contents($file));
 
             return $dirname;
         }

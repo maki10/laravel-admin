@@ -35,9 +35,9 @@ class SLA
     public function page($page_query = null)
     {
         if (is_string($page_query)) {
-            return Page::where(['slug' => $page_query])->first();
+            return Page::where(['slug' => $page_query])->with('elements')->first();
         } elseif (is_int($page_query)) {
-            return Page::where(['id' => $page_query])->first();
+            return Page::where(['id' => $page_query])->with('elements')->first();
         }
 
         return new Page();
@@ -63,7 +63,7 @@ class SLA
     public function gallery($key = false)
     {
         if ($key) {
-            return Gallery::where(['key' => $key])->first();
+            return Gallery::where(['key' => $key])->with('images')->first();
         }
 
         return new Gallery();
@@ -112,7 +112,7 @@ class SLA
     /**
      * Instance of map.
      *
-     * @return type
+     * @return Map
      */
     public function map($key)
     {
@@ -120,40 +120,64 @@ class SLA
     }
 
     /**
-     * Get file from storage(Image, PDF,...).
+     * Get file from storage.
      *
-     * @param string      $filename
-     * @param bool|number $width
-     * @param bool|number $height
+     * @param string $key
      *
      * @return string
      */
-    public function getFile($filename, $width = false, $height = false)
+    public function getFile($key)
     {
+        return Storage::exists($key) ? Storage::url($key) : false;
+    }
+
+    /**
+     * Get image from storage. Optionally resized and cached for future use.
+     *
+     * @param string   $key
+     * @param null|int $width
+     * @param null|int $height
+     *
+     * @return string
+     */
+    public function getImage($key, $width = null, $height = null)
+    {
+        $key = str_replace(Storage::url(''), '', (string) $key);
+
+        if (!Storage::exists($key)) {
+            return false;
+        }
+
         if ($width || $height) {
-            $fileWithoutExtension = explode('.', $filename);
+            list($dirname, $basename, $extension, $filename) = array_values(pathinfo($key));
 
-            $newFile = $fileWithoutExtension[0].'_'.
-                        (!empty($width) ? 'w'.$width : null).
-                        (!empty($height) && !empty($width) ? '_' : '').
-                        (!empty($height) ? 'h'.$height : null).'.'.
-                        $fileWithoutExtension[count($fileWithoutExtension) - 1];
+            if ($extension === 'svg') {
+                return Storage::url($key);
+            }
 
-            if (is_file('storage/'.$newFile)) {
-                return asset('storage').'/'.$newFile;
+            $width_modifier = empty($width) ? '' : "_w$width";
+            $height_modifier = empty($height) ? '' : "_h$height";
+
+            $resized_key = $dirname.DIRECTORY_SEPARATOR.$filename.$width_modifier.$height_modifier.'.'.$extension;
+
+            if (Storage::exists($resized_key)) {
+                return Storage::url($resized_key);
             } else {
-                $image = Image::make('storage/'.$filename)->orientate()
-                ->resize((!empty($width) ? $width : null), (!empty($height) ? $height : null), function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })->interlace()->encode();
+                $image = Image::make(Storage::get($key))
+                    ->orientate()
+                    ->resize($width, $height, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    })
+                    ->interlace()
+                    ->encode();
 
-                Storage::put('public/'.$newFile, $image);
+                Storage::put($resized_key, $image);
 
-                return asset('storage').'/'.$newFile;
+                return Storage::url($resized_key);
             }
         }
 
-        return asset('storage').'/'.$filename;
+        return Storage::url($key);
     }
 }

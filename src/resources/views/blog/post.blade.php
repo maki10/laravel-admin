@@ -22,6 +22,9 @@
 			<label>Slug</label>
 			<input type="text" name="slug" value="{{$post->slug}}">
 
+			<label>Author</label>
+			<input type="text" name="author" value="{{$post->author}}">
+
 			<label>Excerpt</label>
 			<textarea name="excerpt" rows="5">{{$post->excerpt}}</textarea>
 
@@ -40,10 +43,23 @@
 				</div>
 			</div>
 
+			<label>Cover image</label>
+			<div class="file-input-wrap cf">
+				@if(!empty($post->cover)) 
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($post->cover)}})"></div>
+					<input type="checkbox" name="delete_cover">Delete this file?
+				@else
+					<div class="fileUpload">
+						<span>Choose file</span>
+						<input type="file" name="cover" class="upload" />
+					</div>
+				@endif
+			</div>
+
 			<label>Thumbnail</label>
 			<div class="file-input-wrap cf">
 				@if(!empty($post->thumb)) 
-					<div class="small-image-preview" style="background-image: url({{ asset('storage') .'/'. $post->thumb}})"></div>
+					<div class="small-image-preview" style="background-image: url({{ Storage::url($post->thumb)}})"></div>
 					<input type="checkbox" name="delete_thumb">Delete this file?
 				@else
 					<div class="fileUpload">
@@ -61,6 +77,9 @@
 
 			<label>SEO Keywords</label>
 			<input type="text" name="meta_keywords" value="{{$post->meta_keywords}}">
+
+			<label>Published at</label>
+			<input id="timepicker" type="text" name="published_at" value="{{ \Carbon\Carbon::parse($post->published_at)->format('m/d/Y H:i') }}">
 
 			<label>Visible</label>
 			<div class="select-style">
@@ -82,6 +101,5 @@
 		</form>
 		
 	</div>
-	
 
 @stop
